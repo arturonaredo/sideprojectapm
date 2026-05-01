@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-
-// Simple in-memory store for demo
-// In production, use a database
-const metricsStore: Map<string, unknown[]> = new Map();
-const rateLimitStore: Map<string, number[]> = new Map();
+import { db, schema } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { generateId } from "@/lib/utils";
 
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const RATE_LIMIT_MAX = 1000; // 1000 requests per minute
+
+// In-memory rate limit store (for demo - use Redis in production)
+const rateLimitStore: Map<string, number[]> = new Map();
 
 function checkRateLimit(apiKey: string): boolean {
   const now = Date.now();
@@ -54,6 +55,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Find project by API key
+    const projects = await db
+      .select()
+      .from(schema.projects)
+      .where(eq(schema.projects.apiKey, apiKey))
+      .limit(1);
+
+    const project = projects[0];
+
+    if (!project) {
+      return NextResponse.json(
+        { error: "Invalid API key" },
+        { status: 401 }
+      );
+    }
+
     // Parse body
     const body = await request.json();
 
@@ -65,7 +82,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validTypes = ["counter", "gauge", "histogram"];
+    const validTypes = ["counter", "gauge", "histogram"] as const;
     if (!validTypes.includes(body.type)) {
       return NextResponse.json(
         { error: `Invalid type. Must be one of: ${validTypes.join(", ")}` },
@@ -74,27 +91,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Create metric
-    const metric = {
-      id: `metric_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      apiKey,
+    const metricId = generateId("metric");
+    const timestamp = body.timestamp || new Date().toISOString();
+
+    await db.insert(schema.metrics).values({
+      id: metricId,
+      projectId: project.id,
       type: body.type,
       name: body.name,
       value: body.value,
       tags: body.tags || {},
-      timestamp: body.timestamp || new Date().toISOString(),
+      timestamp,
       receivedAt: new Date().toISOString(),
-    };
-
-    // Store metric (demo: store in memory)
-    const projectMetrics = metricsStore.get(apiKey) || [];
-    projectMetrics.push(metric);
-    metricsStore.set(apiKey, projectMetrics);
+    });
 
     // Return success (202 Accepted for async processing)
     return NextResponse.json(
       {
         accepted: true,
-        id: metric.id,
+        id: metricId,
       },
       { status: 202 }
     );
