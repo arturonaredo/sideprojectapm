@@ -1,10 +1,10 @@
 {
   "project": "sideprojectapm",
   "notionId": "352def52-86b0-8160-97ee-ffa4c028032d",
-  "phase": "qa",
+  "phase": "deployed",
   "startedAt": "2026-04-30T22:00:00Z",
-  "completedAt": null,
-  "completedPhases": ["po", "ux", "ui", "dev"],
+  "completedAt": "2026-05-01T22:30:00Z",
+  "completedPhases": ["po", "ux", "ui", "dev", "qa", "deploy"],
   "currentTask": null,
   "tasks": [
     {"id": "T1", "name": "Setup Next.js 14 + TypeScript + Tailwind", "status": "done", "depends": []},
@@ -19,5 +19,11 @@
   ],
   "tags": ["devtools", "micro-saas", "observability"],
   "idea": "SideProjectAPM - APM para side projects",
-  "githubRepo": "https://github.com/arturonaredo/sideprojectapm"
+  "githubRepo": "https://github.com/arturonaredo/sideprojectapm",
+  "deploy": {
+    "ct": 155,
+    "ip": "192.168.31.29",
+    "port": 3000,
+    "url": "http://192.168.31.29:3000"
+  }
 }
