@@ -15,17 +15,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Area,
-  AreaChart,
-} from "recharts";
+// Simple chart visualization without external library
 import { maskApiKey, formatRelativeTime } from "@/lib/utils";
 
 // Demo data for project detail
@@ -225,46 +215,29 @@ export default async function ProjectDetailPage({
             <p className="text-sm text-gray-500">Last 7 days</p>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={uptimeData}>
-                  <defs>
-                    <linearGradient id="uptimeGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#9CA3AF"
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    domain={[95, 100]}
-                    stroke="#9CA3AF"
-                    fontSize={12}
-                    tickLine={false}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #E5E7EB",
-                      borderRadius: "8px",
-                    }}
-                    formatter={(value) => [`${value}%`, "Uptime"]}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="uptime"
-                    stroke="#10B981"
-                    strokeWidth={2}
-                    fill="url(#uptimeGradient)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div className="h-64 flex flex-col">
+              {/* Y-axis labels */}
+              <div className="flex justify-between text-xs text-gray-500 mb-2">
+                <span>95%</span>
+                <span>96%</span>
+                <span>97%</span>
+                <span>98%</span>
+                <span>99%</span>
+                <span>100%</span>
+              </div>
+              {/* Bar chart */}
+              <div className="flex-1 flex items-end gap-2">
+                {uptimeData.map((day) => (
+                  <div key={day.date} className="flex-1 flex flex-col items-center">
+                    <div
+                      className="w-full bg-green-500 rounded-t-sm transition-all hover:bg-green-600"
+                      style={{ height: `${(day.uptime - 95) * 20}%` }}
+                      title={`${day.uptime}% uptime`}
+                    />
+                    <span className="text-xs text-gray-500 mt-2">{day.date}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -278,39 +251,29 @@ export default async function ProjectDetailPage({
             <p className="text-sm text-gray-500">Last 7 days</p>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={uptimeData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#9CA3AF"
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    stroke="#9CA3AF"
-                    fontSize={12}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#fff",
-                      border: "1px solid #E5E7EB",
-                      borderRadius: "8px",
-                    }}
-                    formatter={(value) => [value, "Errors"]}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="errors"
-                    stroke="#EF4444"
-                    strokeWidth={2}
-                    dot={{ fill: "#EF4444", strokeWidth: 2 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="h-64 flex flex-col">
+              {/* Y-axis labels */}
+              <div className="flex justify-between text-xs text-gray-500 mb-2">
+                <span>0</span>
+                <span>2</span>
+                <span>4</span>
+                <span>6</span>
+                <span>8</span>
+                <span>10</span>
+              </div>
+              {/* Bar chart */}
+              <div className="flex-1 flex items-end gap-2">
+                {uptimeData.map((day) => (
+                  <div key={day.date} className="flex-1 flex flex-col items-center">
+                    <div
+                      className="w-full bg-red-500 rounded-t-sm transition-all hover:bg-red-600"
+                      style={{ height: `${(day.errors / 10) * 100}%` }}
+                      title={`${day.errors} errors`}
+                    />
+                    <span className="text-xs text-gray-500 mt-2">{day.date}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>
