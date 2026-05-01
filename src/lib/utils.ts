@@ -134,8 +134,9 @@ export function isDefined<T>(value: T | null | undefined): value is T {
 }
 
 /**
- * Generate a random ID (for client-side use only)
+ * Generate a random ID with optional prefix
  */
-export function generateId(): string {
-  return Math.random().toString(36).substring(2, 15);
+export function generateId(prefix?: string): string {
+  const id = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  return prefix ? `${prefix}_${id}` : id;
 }

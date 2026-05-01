@@ -4,8 +4,8 @@
  * Uses node-cron to run periodic uptime checks for all active projects.
  */
 
-import { schedule, validate } from 'node-cron';
-import { db, schema } from './db';
+import { schedule, type ScheduledTask } from 'node-cron';
+import { db, schema } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { checkUptime, type UptimeCheckResult } from './uptime-checker';
 import { generateId } from './utils';
@@ -14,10 +14,7 @@ import { generateId } from './utils';
 // Scheduler state
 // ============================================================================
 
-let schedulerJob: {
-  stop: () => void;
-  start: () => void;
-} | null = null;
+let schedulerJob: ScheduledTask | null = null;
 let isRunning = false;
 
 // Track last check times to avoid duplicate checks
@@ -138,8 +135,7 @@ export function startScheduler(): void {
       }
     },
     {
-      scheduled: true,
-      runOnInit: false, // Don't run immediately on start
+      name: 'uptime-monitor',
     }
   );
 
